@@ -48,12 +48,16 @@ const { isLoading: nearbyIsLoading, isSuccess: nearbyIsSuccess, isError: nearbyI
 <template>
   <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
     <div>
-      <label class="text-gray-700 text-sm font-bold mb-2" for="radius">Radius (2-25km):</label>
-      <input type="number" id="radius" name="radius" min="2" max="25" v-model="radius">
+      <label class="text-gray-700 text-sm font-bold mb-2 mr-2" for="radius">Radius (2-25km):</label>
+      <input
+        class="shadow appearance-none border rounded p-1 m-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        type="number" id="radius" name="radius" min="2" max="25" v-model="radius">
     </div>
     <div>
-      <label class="text-gray-700 text-sm font-bold mb-2" for="locationsTotal">Total locations (10-50):</label>
-      <input type="number" id="locationsTotal" name="locationsTotal" min="10" max="50" v-model="locationsTotal">
+      <label class="text-gray-700 text-sm font-bold mb-2 mr-2" for="locationsTotal">Total locations (10-50):</label>
+      <input class="shadow appearance-none border rounded p-1 m-1 text-gray-700 leading-tight
+        focus:outline-none focus:shadow-outline" type="number" id="locationsTotal" name="locationsTotal" min="10"
+        max="50" v-model="locationsTotal">
     </div>
     <div>
       <fieldset>

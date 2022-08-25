@@ -47,17 +47,23 @@ const { isLoading: nearbyIsLoading, isSuccess: nearbyIsSuccess, isError: nearbyI
 
 <template>
   <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-    <div>
-      <label class="text-gray-700 text-sm font-bold mb-2 mr-2" for="radius">Radius (2-25km):</label>
-      <input
-        class="shadow appearance-none border rounded p-1 m-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        type="number" id="radius" name="radius" min="2" max="25" v-model="radius">
-    </div>
-    <div>
-      <label class="text-gray-700 text-sm font-bold mb-2 mr-2" for="locationsTotal">Total locations (10-50):</label>
-      <input class="shadow appearance-none border rounded p-1 m-1 text-gray-700 leading-tight
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="grid grid-rows-2 items-center" style="grid-template-columns:1fr min-content;">
+          <label class="text-gray-700 text-sm font-bold mb-2 mr-2" for="radius">Radius (2-25km):</label>
+          <input
+            class="shadow appearance-none border rounded p-1 m-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            type="number" id="radius" name="radius" min="2" max="25" v-model="radius">
+
+          <label class="text-gray-700 text-sm font-bold mb-2 mr-2" for="locationsTotal">Total locations (10-50):</label>
+          <input class="shadow appearance-none border rounded p-1 m-1 text-gray-700 leading-tight
         focus:outline-none focus:shadow-outline" type="number" id="locationsTotal" name="locationsTotal" min="10"
-        max="50" v-model="locationsTotal">
+            max="50" v-model="locationsTotal">
+        </div>
+      </div>
+      <div v-if="nearbyData">
+        <p>Found Locations: {{ nearbyData.length }}</p>
+      </div>
     </div>
     <div>
       <fieldset>
@@ -77,7 +83,7 @@ const { isLoading: nearbyIsLoading, isSuccess: nearbyIsSuccess, isError: nearbyI
   </div>
 
   <div v-if="searchAddress != ''" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-    <p>Found Addresses</p>
+    <p>Found Addresses:</p>
     <span v-if="autoIsLoading">Loading...</span>
     <span v-else-if="autoIsError">Sorry, can't find that Location.</span>
     <div v-else>

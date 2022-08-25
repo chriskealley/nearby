@@ -46,67 +46,77 @@ const { isLoading: nearbyIsLoading, isSuccess: nearbyIsSuccess, isError: nearbyI
 </script>
 
 <template>
-  <div>
+  <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
     <div>
-      <label for="radius">Radius (2-25km):</label>
+      <label class="text-gray-700 text-sm font-bold mb-2" for="radius">Radius (2-25km):</label>
       <input type="number" id="radius" name="radius" min="2" max="25" v-model="radius">
     </div>
     <div>
-      <label for="locationsTotal">Total locations (10-50):</label>
+      <label class="text-gray-700 text-sm font-bold mb-2" for="locationsTotal">Total locations (10-50):</label>
       <input type="number" id="locationsTotal" name="locationsTotal" min="10" max="50" v-model="locationsTotal">
     </div>
     <div>
       <fieldset>
         <legend>Choose your place types:</legend>
         <div v-for="place in tags" :key="place.place">
-          <input type="checkbox" :id="place.place" v-model="place.selected">
-          <label :for="place.place" @click="place.selected = !place.selected">{{ place.name }}</label>
+          <input class="mr-2 leading-tight" type="checkbox" :id="place.place" v-model="place.selected">
+          <label class="text-gray-700 text-sm font-bold mb-2" :for="place.place"
+            @click="place.selected = !place.selected">{{ place.name }}</label>
         </div>
       </fieldset>
     </div>
-  </div>
-  <div>
-    <label for="inputAddress">Search Address</label>
-    <input id="inputAddress" v-model="inputAddress">
+
+    <label class="block text-gray-700 text-sm font-bold mb-2 mt-4" for="inputAddress">Search Address</label>
+    <input
+      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+      id="inputAddress" v-model="inputAddress">
   </div>
 
-  <div v-if="searchAddress != ''">
+  <div v-if="searchAddress != ''" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
     <p>Found Addresses</p>
     <span v-if="autoIsLoading">Loading...</span>
     <span v-else-if="autoIsError">Sorry, can't find that Location.</span>
     <div v-else>
       <div v-for=" location in autoData" :key="location.place_id" v-on:click="selectedAddress = location">
-        <input type="radio" :id="location" :value="location" v-model="selectedAddress" />
-        <label for="location">{{ location.display_name }}</label>
+        <input class="mr-2 leading-tight" type="radio" :id="location" :value="location" v-model="selectedAddress" />
+        <label class="text-gray-700 text-sm font-bold mb-2" for="location">{{ location.display_name }}</label>
       </div>
     </div>
   </div>
 
-  <div v-if="nearbyData && nearbyData.length > 0">
+  <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" v-if="nearbyData && nearbyData.length > 0">
     <span v-if="nearbyIsLoading">Finding Nearby Locations...</span>
     <span v-else-if="nearbyIsError">Sorry, can't find any Nearby Locations.</span>
     <div v-else-if="nearbyIsSuccess">
       <p>Found Locations: {{ nearbyData.length }}</p>
       <div v-for="location in nearbyData" :key="location.place_id">
-        <input type="checkbox" :id="location.place_id" :value="location" v-model="selectedLocations">
-        <label :for="location.place_id">{{ location.address.name }} - {{ location.address.state }} - {{
-            location.type.toUpperCase()
-        }}</label>
+        <input class="mr-2 leading-tight" type="checkbox" :id="location.place_id" :value="location"
+          v-model="selectedLocations">
+        <label class="text-gray-700 text-sm font-bold mb-2" :for="location.place_id">{{ location.address.name }} -
+          {{ location.address.state }} - {{
+              location.type.toUpperCase()
+          }}</label>
       </div>
     </div>
   </div>
 
-  <div v-if="selectedLocations.length > 0">
-    <label for="state">State Override</label>
-    <input id="state" v-model="state">
-    <label for="stateCode">State Code</label>
-    <input id="stateCode" v-model="stateCode">
-    <p>Selected Locations: {{ selectedLocations.length }}</p>
-    <div v-if="state" v-for="location in selectedLocations">
-      {{ location.name }}, {{ state }}, {{ stateCode }}
-    </div>
-    <div v-else v-for="location in selectedLocations">
-      {{ location.name }}, {{ location.address.state }}, {{ stateCode }}
+  <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" v-if="selectedLocations.length > 0">
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="state">State Override</label>
+    <input
+      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+      id="state" v-model="state">
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="stateCode">State Code</label>
+    <input
+      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+      id="stateCode" v-model="stateCode">
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+      <p class="mt-4">Selected Locations: {{ selectedLocations.length }}</p>
+      <div v-if="state" v-for="location in selectedLocations">
+        {{ location.name }}, {{ state }}, {{ stateCode }}
+      </div>
+      <div v-else v-for="location in selectedLocations">
+        {{ location.name }}, {{ location.address.state }}, {{ stateCode }}
+      </div>
     </div>
   </div>
 

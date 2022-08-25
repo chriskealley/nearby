@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { useQueryProvider } from "vue-query";
-useQueryProvider();
-
 import NearBy from './components/NearBy.vue'
+useQueryProvider();
 </script>
 
 <template>

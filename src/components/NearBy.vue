@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, Ref, ref, watch } from "vue";
 import { refDebounced } from '@vueuse/core'
-
 import { useAutoComplete, useNearby } from "../composables/queries";
 
 const selectedAddress = ref()

@@ -2,6 +2,7 @@
 import { computed, Ref, ref, watch } from "vue";
 import { refDebounced } from '@vueuse/core'
 import { useAutoComplete, useNearby } from "../composables/queries";
+import StaticMap from "./StaticMap.vue";
 
 const selectedAddress = ref()
 const radius = ref(5)
@@ -30,9 +31,10 @@ const radiusM = refDebounced(computed(() => (radius.value * 1000)), 1000)
 
 const selectedLocations: Ref<any[]> = ref([])
 
-watch(selectedAddress, () => {
-  selectedLat.value = selectedAddress.value.lat
-  selectedLon.value = selectedAddress.value.lon
+const markers = computed(() => {
+  return selectedLocations.value.map((location) => {
+    return { lat: location.lat, lon: location.lon }
+  })
 })
 
 watch(inputAddress, () => {
@@ -41,93 +43,106 @@ watch(inputAddress, () => {
   selectedLocations.value = []
 })
 
+watch(selectedAddress, () => {
+  selectedLat.value = selectedAddress.value.lat
+  selectedLon.value = selectedAddress.value.lon
+  selectedLocations.value = []
+})
+
+
+
 const { isLoading: nearbyIsLoading, isSuccess: nearbyIsSuccess, isError: nearbyIsError, data: nearbyData, error: nearbyError } = useNearby(selectedLat, selectedLon, radiusM, selectedTags, limit)
 
 </script>
 
 <template>
-  <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-    <div class="flex items-center justify-between">
-      <div>
-        <div class="grid grid-rows-2 items-center" style="grid-template-columns:1fr min-content;">
-          <label class="text-gray-700 text-sm font-bold mb-2 mr-2" for="radius">Radius (2-25km):</label>
-          <input
-            class="shadow appearance-none border rounded p-1 m-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            type="number" id="radius" name="radius" min="2" max="25" v-model="radius">
+  <div class="md:grid grid-cols-2">
+    <div class="max-w-xl bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="grid grid-rows-2 items-center" style="grid-template-columns:1fr min-content;">
+            <label class="text-gray-700 text-sm font-bold mb-2 mr-2" for="radius">Radius (2-25km):</label>
+            <input
+              class="shadow appearance-none border rounded p-1 m-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              type="number" id="radius" name="radius" min="2" max="25" v-model="radius">
 
-          <label class="text-gray-700 text-sm font-bold mb-2 mr-2" for="locationsTotal">Total locations (10-50):</label>
-          <input class="shadow appearance-none border rounded p-1 m-1 text-gray-700 leading-tight
+            <label class="text-gray-700 text-sm font-bold mb-2 mr-2" for="locationsTotal">Total locations
+              (10-50):</label>
+            <input class="shadow appearance-none border rounded p-1 m-1 text-gray-700 leading-tight
         focus:outline-none focus:shadow-outline" type="number" id="locationsTotal" name="locationsTotal" min="10"
-            max="50" v-model="locationsTotal">
+              max="50" v-model="locationsTotal">
+          </div>
+        </div>
+        <div v-if="nearbyData">
+          <p>Found Locations: {{ nearbyData.length }}</p>
         </div>
       </div>
-      <div v-if="nearbyData">
+      <div>
+        <fieldset>
+          <legend>Choose your place types:</legend>
+          <div v-for="place in tags" :key="place.place">
+            <input class="mr-2 leading-tight" type="checkbox" :id="place.place" v-model="place.selected">
+            <label class="text-gray-700 text-sm font-bold mb-2" :for="place.place"
+              @click="place.selected = !place.selected">{{ place.name }}</label>
+          </div>
+        </fieldset>
+      </div>
+
+      <label class="block text-gray-700 text-sm font-bold mb-2 mt-4" for="inputAddress">Search Address</label>
+      <input
+        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        id="inputAddress" v-model="inputAddress">
+    </div>
+
+    <div v-if="searchAddress != ''" class="max-w-xl bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+      <p>Found Addresses:</p>
+      <span v-if="autoIsLoading">Loading...</span>
+      <span v-else-if="autoIsError">Sorry, can't find that Location.</span>
+      <div v-else>
+        <div v-for=" location in autoData" :key="location.place_id" v-on:click="selectedAddress = location">
+          <input class="mr-2 leading-tight" type="radio" :id="location" :value="location" v-model="selectedAddress" />
+          <label class="text-gray-700 text-sm font-bold mb-2" for="location">{{ location.display_name }}</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="md:grid grid-cols-2">
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" v-if="nearbyData && nearbyData.length > 0">
+      <span v-if="nearbyIsLoading">Finding Nearby Locations...</span>
+      <span v-else-if="nearbyIsError">Sorry, can't find any Nearby Locations.</span>
+      <div v-else-if="nearbyIsSuccess">
         <p>Found Locations: {{ nearbyData.length }}</p>
-      </div>
-    </div>
-    <div>
-      <fieldset>
-        <legend>Choose your place types:</legend>
-        <div v-for="place in tags" :key="place.place">
-          <input class="mr-2 leading-tight" type="checkbox" :id="place.place" v-model="place.selected">
-          <label class="text-gray-700 text-sm font-bold mb-2" :for="place.place"
-            @click="place.selected = !place.selected">{{ place.name }}</label>
+        <div v-for="location in nearbyData" :key="location.place_id">
+          <input class="mr-2 leading-tight" type="checkbox" :id="location.place_id" :value="location"
+            v-model="selectedLocations">
+          <label class="text-gray-700 text-sm font-bold mb-2" :for="location.place_id">{{ location.address.name }} -
+            {{ location.address.state }} - {{
+                location.type.toUpperCase()
+            }}</label>
         </div>
-      </fieldset>
+      </div>
     </div>
 
-    <label class="block text-gray-700 text-sm font-bold mb-2 mt-4" for="inputAddress">Search Address</label>
-    <input
-      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-      id="inputAddress" v-model="inputAddress">
-  </div>
-
-  <div v-if="searchAddress != ''" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-    <p>Found Addresses:</p>
-    <span v-if="autoIsLoading">Loading...</span>
-    <span v-else-if="autoIsError">Sorry, can't find that Location.</span>
-    <div v-else>
-      <div v-for=" location in autoData" :key="location.place_id" v-on:click="selectedAddress = location">
-        <input class="mr-2 leading-tight" type="radio" :id="location" :value="location" v-model="selectedAddress" />
-        <label class="text-gray-700 text-sm font-bold mb-2" for="location">{{ location.display_name }}</label>
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" v-if="selectedLocations.length > 0">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="state">State Override</label>
+      <input
+        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        id="state" v-model="state">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="stateCode">State Code</label>
+      <input
+        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        id="stateCode" v-model="stateCode">
+      <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <p class="mt-4">Selected Locations: {{ selectedLocations.length }}</p>
+        <div v-if="state" v-for="location in selectedLocations">
+          {{ location.name }}, {{ state }}, {{ stateCode }}
+        </div>
+        <div v-else v-for="location in selectedLocations">
+          {{ location.name }}, {{ location.address.state }}, {{ stateCode }}
+        </div>
       </div>
     </div>
   </div>
-
-  <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" v-if="nearbyData && nearbyData.length > 0">
-    <span v-if="nearbyIsLoading">Finding Nearby Locations...</span>
-    <span v-else-if="nearbyIsError">Sorry, can't find any Nearby Locations.</span>
-    <div v-else-if="nearbyIsSuccess">
-      <p>Found Locations: {{ nearbyData.length }}</p>
-      <div v-for="location in nearbyData" :key="location.place_id">
-        <input class="mr-2 leading-tight" type="checkbox" :id="location.place_id" :value="location"
-          v-model="selectedLocations">
-        <label class="text-gray-700 text-sm font-bold mb-2" :for="location.place_id">{{ location.address.name }} -
-          {{ location.address.state }} - {{
-              location.type.toUpperCase()
-          }}</label>
-      </div>
-    </div>
-  </div>
-
-  <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" v-if="selectedLocations.length > 0">
-    <label class="block text-gray-700 text-sm font-bold mb-2" for="state">State Override</label>
-    <input
-      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-      id="state" v-model="state">
-    <label class="block text-gray-700 text-sm font-bold mb-2" for="stateCode">State Code</label>
-    <input
-      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-      id="stateCode" v-model="stateCode">
-    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-      <p class="mt-4">Selected Locations: {{ selectedLocations.length }}</p>
-      <div v-if="state" v-for="location in selectedLocations">
-        {{ location.name }}, {{ state }}, {{ stateCode }}
-      </div>
-      <div v-else v-for="location in selectedLocations">
-        {{ location.name }}, {{ location.address.state }}, {{ stateCode }}
-      </div>
-    </div>
-  </div>
+  <StaticMap :lat="selectedLat" :lon="selectedLon" :markers="markers" />
 
 </template>

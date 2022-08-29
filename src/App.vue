@@ -5,7 +5,7 @@ useQueryProvider();
 </script>
 
 <template>
-  <div class="w-full max-w-xl m-auto">
+  <div class="container mx-auto">
     <h1 class="text-3xl font-bold m-4">Find Nearby Locations</h1>
     <NearBy />
   </div>

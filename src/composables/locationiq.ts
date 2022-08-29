@@ -1,11 +1,15 @@
 import axios from "axios";
 
 const accessToken = import.meta.env.VITE_LOCATIONIQ_TOKEN;
+interface LatLon {
+  lat: string;
+  lon: string;
+}
 
 export function autoComplete(searchString: string) {
   if (searchString != "") {
     return axios.get(
-      `https://api.locationiq.com/v1/autocomplete?key=${accessToken}&q=${searchString}&format=json`
+      `https://api.locationiq.com/v1/autocomplete?key=${accessToken}&q=${searchString}&tag=place:*&dedupe=1&format=json`
     );
   }
   return;

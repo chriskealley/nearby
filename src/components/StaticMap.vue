@@ -30,7 +30,7 @@ watchDebounced(
     }
     src.value = `https://maps.locationiq.com/v3/staticmap?key=${accessToken}&center=${lat.value},${lon.value}&markers=icon:small-red-cutout|${lat.value},${lon.value}${markerParam}`
   },
-  { debounce: 1000, maxWait: 2000 },
+  { debounce: 2000 },
 )
 
 </script>

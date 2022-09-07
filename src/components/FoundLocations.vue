@@ -40,16 +40,10 @@ const selectAll = computed(() => {
   return false
 })
 
-// watch(selectAll, () => {
-//   if (selectAll.value) selected.value = data.value
-//   else selected.value = []
-// })
-
 function selectAllFound() {
   if (data.value.length == selected.value.length) selected.value = []
   else selected.value = data.value
 }
-
 
 const selected = computed({
   get() {

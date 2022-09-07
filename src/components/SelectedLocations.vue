@@ -1,5 +1,6 @@
 <script setup lang="ts" >
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import IconCopyToClipboard from "./IconCopyToClipboard.vue"
 
 interface Location {
   address: {
@@ -20,10 +21,29 @@ interface Location {
   type: string;
 }
 
-defineProps<{ locations: Location[] }>()
+const props = defineProps<{ locations: Location[] }>()
 
 const state = ref('')
 const stateCode = ref('')
+
+const selected = computed(() => {
+  if (state.value) {
+    return props.locations.map((location) => {
+      return `${location.name}, ${state.value}, ${stateCode.value}`
+    })
+  }
+  return props.locations.map((location) => {
+    return `${location.name}, ${location.address.state}, ${stateCode.value}`
+  })
+})
+
+const copied = ref(false)
+
+function copyToClipboard() {
+  navigator.clipboard.writeText(selected.value.join('\r\n'))
+  copied.value = true
+  setTimeout(() => copied.value = false, 1500)
+}
 
 </script>
 
@@ -36,16 +56,13 @@ const stateCode = ref('')
       <label class="block text-gray-700 text-sm font-bold mt-4 mb-2" for="stateCode">State Code</label>
       <input id="stateCode" v-model="stateCode"
         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-      <p class="my-4 font-bold">Selected Locations: {{ locations.length }}</p>
-      <div v-if="state">
-        <div v-for="location in locations" :key="location.place_id">
-          {{ location.name }}, {{ state }}, {{ stateCode }}
-        </div>
+      <div class="flex items-center gap-2">
+        <p class="my-4 font-bold">Selected Locations: {{ locations.length }}</p>
+        <IconCopyToClipboard class="hover:cursor-pointer" @click="copyToClipboard" />
+        <span v-if="copied">Copied to clipboard</span>
       </div>
-      <div v-else>
-        <div v-for="location in locations" :key="location.place_id">
-          {{ location.name }}, {{ location.address.state }}, {{ stateCode }}
-        </div>
+      <div v-for="location in selected" :key="location">
+        {{ location }}
       </div>
     </div>
   </div>

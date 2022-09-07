@@ -71,7 +71,7 @@ watch(selectedAddress, () => {
 
 <template>
   <div class="md:grid grid-cols-2 gap-2">
-    <div class="max-w-xl bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
       <div class="flex items-center justify-between">
         <div>
           <div class="grid grid-rows-2 items-center" style="grid-template-columns:1fr min-content;">
@@ -106,7 +106,7 @@ watch(selectedAddress, () => {
         id="inputAddress" v-model="inputAddress">
     </div>
 
-    <div v-if="searchAddress != ''" class="max-w-xl bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+    <div v-if="searchAddress != ''" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
       <p class="my-4 font-bold">Found Addresses:</p>
       <span v-if="autoIsLoading">Loading...</span>
       <span v-else-if="autoIsError">Sorry, can't find that Location.</span>

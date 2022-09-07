@@ -1,8 +1,29 @@
 <script setup lang="ts">
 import { computed, Ref, ref, watch } from "vue";
 import { refDebounced } from '@vueuse/core'
-import { useAutoComplete, useNearby } from "../composables/queries";
+import { useAutoComplete } from "../composables/queries";
+import SelectedLocations from "./SelectedLocations.vue"
 import StaticMap from "./StaticMap.vue";
+import FoundLocations from "./FoundLocations.vue";
+
+interface Location {
+  address: {
+    city: string;
+    country: string;
+    country_code: string;
+    name: string;
+    postcode: string;
+    state: string;
+  };
+  class: string;
+  display_name: string;
+  lat: string;
+  lon: string;
+  name: string;
+  place_id: string;
+  tag_type: string;
+  type: string;
+}
 
 const selectedAddress = ref()
 const radius = ref(5)
@@ -16,25 +37,22 @@ const tags = ref([
   { place: "suburb", name: "Suburbs", selected: true },
   { place: "neighbourhood", name: "Neighbourhoods", selected: false },
 ])
-const state = ref('')
-const stateCode = ref('')
 
 const selectedTags = refDebounced(computed(() => tags.value.filter((tag) => tag.selected).map((tag) => tag.place)), 1000)
 
 const searchAddress = refDebounced(inputAddress, 2500)
 
-const { isLoading: autoIsLoading, isError: autoIsError, data: autoData, error: autoError } = useAutoComplete(searchAddress)
+const { isLoading: autoIsLoading, isError: autoIsError, data: autoData } = useAutoComplete(searchAddress)
 
 const selectedLat: Ref<string> = ref('')
 const selectedLon: Ref<string> = ref('')
-const radiusM = refDebounced(computed(() => (radius.value * 1000)), 1000)
 
-const selectedLocations: Ref<any[]> = ref([])
+const selectedLocations: Ref<Location[]> = ref([])
 
 const markers = computed(() => {
-  return selectedLocations.value.map((location) => {
+  return selectedLocations.value?.map((location) => {
     return { lat: location.lat, lon: location.lon }
-  })
+  }) || []
 })
 
 watch(inputAddress, () => {
@@ -48,10 +66,6 @@ watch(selectedAddress, () => {
   selectedLon.value = selectedAddress.value.lon
   selectedLocations.value = []
 })
-
-
-
-const { isLoading: nearbyIsLoading, isSuccess: nearbyIsSuccess, isError: nearbyIsError, data: nearbyData, error: nearbyError } = useNearby(selectedLat, selectedLon, radiusM, selectedTags, limit)
 
 </script>
 
@@ -73,9 +87,7 @@ const { isLoading: nearbyIsLoading, isSuccess: nearbyIsSuccess, isError: nearbyI
               max="50" v-model="locationsTotal">
           </div>
         </div>
-        <div v-if="nearbyData">
-          <p>Found Locations: {{ nearbyData.length }}</p>
-        </div>
+
       </div>
       <div>
         <fieldset>
@@ -107,41 +119,9 @@ const { isLoading: nearbyIsLoading, isSuccess: nearbyIsSuccess, isError: nearbyI
     </div>
   </div>
   <div class="md:grid grid-cols-2">
-    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" v-if="nearbyData && nearbyData.length > 0">
-      <span v-if="nearbyIsLoading">Finding Nearby Locations...</span>
-      <span v-else-if="nearbyIsError">Sorry, can't find any Nearby Locations.</span>
-      <div v-else-if="nearbyIsSuccess">
-        <p>Found Locations: {{ nearbyData.length }}</p>
-        <div v-for="location in nearbyData" :key="location.place_id">
-          <input class="mr-2 leading-tight" type="checkbox" :id="location.place_id" :value="location"
-            v-model="selectedLocations">
-          <label class="text-gray-700 text-sm font-bold mb-2" :for="location.place_id">{{ location.address.name }} -
-            {{ location.address.state }} - {{
-                location.type.toUpperCase()
-            }}</label>
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" v-if="selectedLocations.length > 0">
-      <label class="block text-gray-700 text-sm font-bold mb-2" for="state">State Override</label>
-      <input
-        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        id="state" v-model="state">
-      <label class="block text-gray-700 text-sm font-bold mb-2" for="stateCode">State Code</label>
-      <input
-        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        id="stateCode" v-model="stateCode">
-      <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <p class="mt-4">Selected Locations: {{ selectedLocations.length }}</p>
-        <div v-if="state" v-for="location in selectedLocations">
-          {{ location.name }}, {{ state }}, {{ stateCode }}
-        </div>
-        <div v-else v-for="location in selectedLocations">
-          {{ location.name }}, {{ location.address.state }}, {{ stateCode }}
-        </div>
-      </div>
-    </div>
+    <FoundLocations :lat="selectedLat" :lon="selectedLon" :radius="radius" :tags="selectedTags" :limit="limit"
+      v-model:locations="selectedLocations" />
+    <SelectedLocations :locations="selectedLocations" />
   </div>
   <StaticMap :lat="selectedLat" :lon="selectedLon" :markers="markers" />
 

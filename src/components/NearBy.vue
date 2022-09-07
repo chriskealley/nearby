@@ -70,7 +70,7 @@ watch(selectedAddress, () => {
 </script>
 
 <template>
-  <div class="md:grid grid-cols-2">
+  <div class="md:grid grid-cols-2 gap-2">
     <div class="max-w-xl bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
       <div class="flex items-center justify-between">
         <div>
@@ -107,18 +107,18 @@ watch(selectedAddress, () => {
     </div>
 
     <div v-if="searchAddress != ''" class="max-w-xl bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-      <p>Found Addresses:</p>
+      <p class="my-4 font-bold">Found Addresses:</p>
       <span v-if="autoIsLoading">Loading...</span>
       <span v-else-if="autoIsError">Sorry, can't find that Location.</span>
       <div v-else>
         <div v-for=" location in autoData" :key="location.place_id" v-on:click="selectedAddress = location">
           <input class="mr-2 leading-tight" type="radio" :id="location" :value="location" v-model="selectedAddress" />
-          <label class="text-gray-700 text-sm font-bold mb-2" for="location">{{ location.display_name }}</label>
+          <label class="text-gray-700 text-sm mb-2" for="location">{{ location.display_name }}</label>
         </div>
       </div>
     </div>
   </div>
-  <div class="md:grid grid-cols-2">
+  <div class="md:grid grid-cols-2 gap-2">
     <FoundLocations :lat="selectedLat" :lon="selectedLon" :radius="radius" :tags="selectedTags" :limit="limit"
       v-model:locations="selectedLocations" />
     <SelectedLocations :locations="selectedLocations" />

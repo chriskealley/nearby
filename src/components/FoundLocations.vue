@@ -74,12 +74,12 @@ const { isLoading, isSuccess, isError, data } = useNearby(lat, lon, radiusM, tag
     <span v-if="isLoading">Finding Nearby Locations...</span>
     <span v-else-if="isError">Sorry, can't find any Nearby Locations.</span>
     <div v-else-if="isSuccess">
-      <p>Found Locations: {{ data.length }}</p>
+      <p class="my-4 font-bold">Found Locations: {{ data.length }}</p>
       <input class="mr-2 leading-tight" type="checkbox" v-model="selectAll" id="selectAll" @click="selectAllFound">
       <label class="text-gray-700 text-sm font-bold my-4" for="selectAll">Select All</label>
       <div v-for="location in data" :key="location.place_id">
         <input class="mr-2 leading-tight" type="checkbox" :value="location" :id="location.place_id" v-model="selected">
-        <label class="text-gray-700 text-sm font-bold mb-2" :for="location.place_id">
+        <label class="text-gray-700 text-sm mb-2" :for="location.place_id">
           {{ location.address.name }} - {{ location.address.state }} - {{ location.type.toUpperCase() }}
         </label>
       </div>
